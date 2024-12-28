@@ -1,18 +1,35 @@
 #include "smalloc.h"
 
+static	mt_data	*g_chunk;
+
 void    *smalloc(int size)
 {
-  void *p = sbrk(0); // when we give the number 0 to sbrk it return the adress of the current top of the heap
-  void *request = sbrk(size); // and here we increment the heap size by "size"
-  if (request == (void*) -1) {
-    return NULL; // sbrk failed.
-  } else {
-    assert(p == request); // Not thread safe.
-    return p;
-  }
+	// a basic implementation to understand how should i start
+	if (size <= 0)
+		return (NULL);
+	g_chunk = mmap(NULL, (sizeof(mt_data) + size), (PROT_READ | PROT_WRITE), (MAP_PRIVATE | MAP_ANONYMOUS), -1, 0);
+	if (g_chunk == MAP_FAILED)
+        return (NULL);
+	g_chunk->size = size;
+	g_chunk->sts = true;
+	g_chunk->chnk_addrs = (void *)((char *)g_chunk + sizeof(mt_data));
+	g_chunk->next_chnuk = NULL;
+	return (g_chunk->chnk_addrs);
+}
+
+void    s_free(void *addrs)
+{
+
 }
 
 int main(void)
 {
-    void *p = smalloc(10);
+	int size = 1000;
+	void *p = smalloc(size);
+	for (size_t i = 0; i < size; i++)
+	{
+		((char*)p)[i] = 'a';
+		printf("%c\n", ((char*)p)[i]);
+	}
+	
 }
